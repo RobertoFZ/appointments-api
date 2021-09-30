@@ -1,19 +1,20 @@
 class Api::V1::ServicesController < ApplicationController
+  include ResponseHelper
   before_action :authenticate_api_user!
   before_action :load_service, only: [:show, :edit, :update, :destroy]
 
   def index
     services = Service.all
-    render json: services, status: 200
+    ok(services)
   end
 
   def create
     service = Service.new(service_params)
 
     if service.save
-      render json: service, status: 200
+      ok(service.to_json)
     else
-      render json: { error: "Error creating the service." }
+      badRequest(nil, "Error creating the service.")
     end
   end
 
@@ -21,14 +22,14 @@ class Api::V1::ServicesController < ApplicationController
     service = Service.new(service_params)
 
     if service.save
-      render json: service, status: 200
+      ok(service.to_json)
     else
-      render json: { error: "Error creating the service." }
+      badRequest(nil, "Error creating the service.")
     end
   end
 
   def show
-    render json: @service, status: 200
+    ok(@service)
   end
 
   private
@@ -43,10 +44,8 @@ class Api::V1::ServicesController < ApplicationController
 
   def load_service
     @service = Service.find_by(id: params[:id])
-    if service
-      render json: service, status: 200
-    else
-      render json: { error: "Service not found." }
+    unless @service
+      notFound(nil, "Service not found.")
     end
   end
 end
